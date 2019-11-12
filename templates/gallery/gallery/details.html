@@ -147,7 +147,8 @@
                         {% endif %}
                     </div>
                     <div class="topic-description">
-                        <a href="{% url "gallery-group-edit" gallery.pk grp.pk %}" class="topic-title-link navigable-link">
+                        <a href="{% url "gallery-group-details" gallery.pk gallery.slug grp.pk grp.slug %}"
+                           class="topic-title-link navigable-link">
                             <img src=""
                                  data-caption="{{ grp.title }}"
                                  alt="{{ grp.title }}"

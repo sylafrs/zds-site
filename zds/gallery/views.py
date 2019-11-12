@@ -12,10 +12,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from zds.gallery.forms import ArchiveImageForm, ImageForm, UpdateImageForm, \
     GalleryForm, UpdateGalleryForm, UserGalleryForm, ImageAsAvatarForm, \
     GalleryGroupForm, UpdateGalleryGroupForm
-from zds.gallery.models import UserGallery, Image, Gallery, GALLERY_WRITE
+from zds.gallery.models import UserGallery, Image, Gallery, GALLERY_WRITE, GalleryGroup
 from zds.gallery.mixins import GalleryCreateMixin, GalleryMixin, GalleryUpdateOrDeleteMixin,\
     NoMoreUserWithWriteIfLeave, ImageUpdateOrDeleteMixin, ImageCreateMixin, UserAlreadyInGallery, UserNotInGallery, \
-    GalleryGroupCreateMixin, GalleryGroupUpdateOrDeleteMixin
+    GalleryGroupMixin, GalleryGroupCreateMixin, GalleryGroupUpdateOrDeleteMixin
 from zds.member.decorator import LoggedWithReadWriteHability
 from zds.utils.paginator import ZdSPagingListView
 from zds.tutorialv2.models.database import PublishableContent
@@ -307,12 +307,12 @@ class ImageFromGalleryContextViewMixin(ImageFromGalleryViewMixin):
         return context
 
 
-class GalleryGroupDetails(GalleryDetails):
+class GalleryGroupDetails(GalleryDetails, GalleryGroupMixin):
     """Gallery group details"""
 
     def get(self, request, *args, **kwargs):
         try:
-            self.get_gallery_group(kwargs.get('pk_group'), kwargs.get('slug_group'))
+            self.get_group(kwargs.get('pk_group'), kwargs.get('slug_group'))
         except GalleryGroup.DoesNotExist:
             raise Http404()
 
@@ -348,7 +348,10 @@ class NewGalleryGroup(ImageFromGalleryContextViewMixin, GalleryGroupCreateMixin,
 
         self.success_url = reverse(
             'gallery-group-details',
-            kwargs={'pk_gallery': self.gallery.pk, 'pk':self.group.pk})
+            kwargs={'pk': self.gallery.pk,
+                    'slug':self.gallery.slug,
+                    'pk_group':self.group.pk,
+                    'slug_group':self.group.slug})
 
         return super().form_valid(form)
 

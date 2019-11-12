@@ -216,14 +216,23 @@ class GalleryGroupMixin(GalleryMixin):
 
     group = None
 
-    def get_group(self, pk):
+    def get_group(self, pk, slug=None):
         """Get the group
 
         :param pk: pk
         :type pk: int
+
+        :param slug: slug (optional)
+        :type slug: str
+
         :rtype: zds.gallery.models.GalleryGroup
         """
-        self.group = GalleryGroup.objects.filter(pk=pk, gallery=self.gallery).get()
+        queryset = GalleryGroup.objects.filter(pk=pk, gallery=self.gallery).get()
+
+        if slug is not None:
+            queryset = queryset.filter(slug=slug)
+
+        self.group = queryset
         return self.group
 
 
