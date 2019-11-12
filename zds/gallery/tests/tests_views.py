@@ -685,7 +685,7 @@ class ModifyImageTest(TestCase):
         self.assertTrue(login_check)
 
         response = self.client.post(
-            reverse('gallery-image-delete', kwargs={'pk_gallery': self.gallery1.pk}),
+            reverse('gallery-item-delete', kwargs={'pk_gallery': self.gallery1.pk}),
             {
                 'gallery': self.gallery1.pk,
             },
@@ -705,7 +705,7 @@ class ModifyImageTest(TestCase):
         self.assertTrue(login_check)
 
         self.client.post(
-            reverse('gallery-image-delete', kwargs={'pk_gallery': self.gallery1.pk}),
+            reverse('gallery-item-delete', kwargs={'pk_gallery': self.gallery1.pk}),
             {
                 'gallery': self.gallery1.pk,
                 'delete': '',
@@ -722,7 +722,7 @@ class ModifyImageTest(TestCase):
         self.assertTrue(login_check)
 
         response = self.client.post(
-            reverse('gallery-image-delete', kwargs={'pk_gallery': self.gallery1.pk}),
+            reverse('gallery-item-delete', kwargs={'pk_gallery': self.gallery1.pk}),
             {
                 'gallery': self.gallery1.pk,
                 'delete': '',
@@ -739,7 +739,7 @@ class ModifyImageTest(TestCase):
         self.assertTrue(login_check)
 
         response = self.client.post(
-            reverse('gallery-image-delete', kwargs={'pk_gallery': self.gallery1.pk}),
+            reverse('gallery-item-delete', kwargs={'pk_gallery': self.gallery1.pk}),
             {
                 'gallery': self.gallery1.pk,
                 'delete_multi': '',
@@ -757,7 +757,7 @@ class ModifyImageTest(TestCase):
         self.assertTrue(login_check)
 
         response = self.client.post(
-            reverse('gallery-image-delete', kwargs={'pk_gallery': self.gallery1.pk}),
+            reverse('gallery-item-delete', kwargs={'pk_gallery': self.gallery1.pk}),
             {
                 'gallery': self.gallery1.pk,
                 'delete': '',
@@ -892,7 +892,7 @@ class NewImageViewTest(TestCase):
         self.assertEqual(Image.objects.filter(gallery=self.gallery).count(), 1)
         self.assertEqual('jpg', img.get_extension())
         response = self.client.post(
-            reverse('gallery-image-delete', kwargs={'pk_gallery': self.gallery.pk}),
+            reverse('gallery-item-delete', kwargs={'pk_gallery': self.gallery.pk}),
             {
                 'delete': '',
                 'image': img.pk

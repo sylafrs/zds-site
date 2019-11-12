@@ -10,10 +10,12 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from zds.gallery.forms import ArchiveImageForm, ImageForm, UpdateImageForm, \
-    GalleryForm, UpdateGalleryForm, UserGalleryForm, ImageAsAvatarForm
+    GalleryForm, UpdateGalleryForm, UserGalleryForm, ImageAsAvatarForm, \
+    GalleryGroupForm, UpdateGalleryGroupForm
 from zds.gallery.models import UserGallery, Image, Gallery, GALLERY_WRITE
 from zds.gallery.mixins import GalleryCreateMixin, GalleryMixin, GalleryUpdateOrDeleteMixin,\
-    NoMoreUserWithWriteIfLeave, ImageUpdateOrDeleteMixin, ImageCreateMixin, UserAlreadyInGallery, UserNotInGallery
+    NoMoreUserWithWriteIfLeave, ImageUpdateOrDeleteMixin, ImageCreateMixin, UserAlreadyInGallery, UserNotInGallery, \
+    GalleryGroupCreateMixin, GalleryGroupUpdateOrDeleteMixin
 from zds.member.decorator import LoggedWithReadWriteHability
 from zds.utils.paginator import ZdSPagingListView
 from zds.tutorialv2.models.database import PublishableContent
@@ -81,6 +83,9 @@ class GalleryDetails(LoginRequiredMixin, GalleryMixin, ZdSPagingListView):
     def get_queryset(self):
         return self.gallery.get_images().order_by('title')
 
+    def get_root_groups(self):
+        return self.gallery.get_groups().filter(parent=None)
+
     def get_context_data(self, **kwargs):
         context = super(GalleryDetails, self).get_context_data(**kwargs)
 
@@ -90,6 +95,7 @@ class GalleryDetails(LoginRequiredMixin, GalleryMixin, ZdSPagingListView):
         context['content_linked'] = self.linked_content()
         context['current_user'] = self.request.user
         context['mode_choices'] = UserGallery.MODE_CHOICES
+        context['groups'] = self.get_root_groups()
 
         return context
 
@@ -299,6 +305,62 @@ class ImageFromGalleryContextViewMixin(ImageFromGalleryViewMixin):
         context['content_linked'] = self.linked_content()
 
         return context
+
+
+class GalleryGroupDetails(GalleryDetails):
+    """Gallery group details"""
+
+    def get(self, request, *args, **kwargs):
+        try:
+            self.get_gallery_group(kwargs.get('pk_group'), kwargs.get('slug_group'))
+        except GalleryGroup.DoesNotExist:
+            raise Http404()
+
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return self.gallery.get_images().filter(group=self.group).order_by('title')
+
+    def get_groups(self):
+        return self.gallery.get_groups().filter(parent=self.group)
+
+    def get_context_data(self, **kwargs):
+        context = super(GalleryDetails, self).get_context_data(**kwargs)
+
+        context['groups'] = self.get_groups()
+
+        return context
+
+
+class NewGalleryGroup(ImageFromGalleryContextViewMixin, GalleryGroupCreateMixin, LoggedWithReadWriteHability, FormView):
+    """Creates a new group."""
+
+    form_class = GalleryGroupForm
+    template_name = 'gallery/group/new.html'
+    must_write = True  # only allowed users can create groups
+
+    def form_valid(self, form):
+
+        self.perform_create(
+            form.cleaned_data.get('title'),
+            form.cleaned_data.get('parent'),
+        )
+
+        self.success_url = reverse(
+            'gallery-group-details',
+            kwargs={'pk_gallery': self.gallery.pk, 'pk':self.group.pk})
+
+        return super().form_valid(form)
+
+
+class EditGalleryGroup(ImageFromGalleryContextViewMixin, GalleryGroupUpdateOrDeleteMixin, LoggedWithReadWriteHability, FormView):
+    """Edits an existing group."""
+
+    form_class = UpdateGalleryGroupForm
+    template_name = 'gallery/group/edit.html'
+
+    def form_valid(self, form):
+        return super().form_valid(form)
 
 
 class NewImage(ImageFromGalleryContextViewMixin, ImageCreateMixin, LoggedWithReadWriteHability, FormView):

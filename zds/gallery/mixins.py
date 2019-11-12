@@ -10,7 +10,7 @@ from easy_thumbnails.files import get_thumbnailer
 
 from django.conf import settings
 
-from zds.gallery.models import Gallery, UserGallery, GALLERY_WRITE, GALLERY_READ, Image
+from zds.gallery.models import Gallery, UserGallery, GALLERY_WRITE, GALLERY_READ, Image, GalleryGroup
 from zds.tutorialv2.models.database import PublishableContent
 
 
@@ -212,6 +212,21 @@ class ImageMixin(GalleryMixin):
         return self.image
 
 
+class GalleryGroupMixin(GalleryMixin):
+
+    group = None
+
+    def get_group(self, pk):
+        """Get the group
+
+        :param pk: pk
+        :type pk: int
+        :rtype: zds.gallery.models.GalleryGroup
+        """
+        self.group = GalleryGroup.objects.filter(pk=pk, gallery=self.gallery).get()
+        return self.group
+
+
 class ImageTooLarge(Exception):
     def __init__(self, title, size):
         self.title = title
@@ -312,6 +327,47 @@ class ImageCreateMixin(ImageMixin):
             shutil.rmtree(temp)
 
         return error_files
+
+
+class GalleryGroupCreateMixin(GalleryGroupMixin):
+    def perform_create(self, title, parent):
+        """Create a new group
+
+        :param title: title
+        :type title: str
+        """
+
+        group = GalleryGroup()
+        group.gallery = self.gallery
+        group.title = title
+
+        group.slug = slugify(title)
+        group.save()
+
+        self.group = group
+
+        return self.group
+
+
+class GalleryGroupUpdateOrDeleteMixin(GalleryGroupMixin):
+    def perform_update(self, data):
+        """Update group information
+
+        :param data: things to update
+        :type data: dict
+        """
+
+        if 'title' in data:
+            self.group.title = data.get('title')
+            self.group.slug = slugify(self.group.title)
+
+        self.group.save()
+
+        return self.group
+
+    def perform_delete(self):
+        """Delete group"""
+        self.group.delete()
 
 
 class ImageUpdateOrDeleteMixin(ImageMixin):

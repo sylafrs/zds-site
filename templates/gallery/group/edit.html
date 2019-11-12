@@ -1,0 +1,54 @@
+{% extends "gallery/base.html" %}
+{% load crispy_forms_tags %}
+{% load thumbnail %}
+{% load remove_url_scheme %}
+{% load i18n %}
+
+
+
+{% block title %}
+    {% trans "Éditer un groupe" %}
+{% endblock %}
+
+
+
+{% block breadcrumb %}
+    <li><a href="{{ gallery.get_absolute_url }}">{{ gallery.title }}</a></li>
+    <li>{% trans "Éditer un groupe" %}</li>
+{% endblock %}
+
+
+
+{% block headline %}
+    {% trans "Éditer un groupe" %}
+
+    {% if permissions.write %}
+        <a href="#form-delete-group" class="btn btn-cancel open-modal">
+            {% trans "Supprimer" %}
+        </a>
+    {% endif %}
+{% endblock %}
+
+
+
+
+{% block content %}
+    <div class="gallery-col-edit">
+        {% if permissions.write %}
+            {% crispy form %}
+            <hr class="clearfix">
+        {% endif %}
+
+        {% crispy as_avatar_form %}
+
+        {% if permissions.write %}
+            {# Confirmation modal for deleting image #}
+            <form id="form-delete-group" name="form" method="post" action="{% url "gallery-item-delete" gallery.pk %}" class="modal modal-flex">
+                {% csrf_token %}
+                <input type="hidden" name="group" value="{{ group.pk }}">
+                <p>{% trans "Attention, vous vous apprêtez à supprimer ce groupe et ses images." %}</p>
+                <button type="submit" name="delete" class="btn">{% trans "Confirmer" %}</button>
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}

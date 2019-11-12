@@ -122,7 +122,7 @@
             <!-- Delete images -->
             <a class="btn btn-cancel open-modal" href="#form-delete-images">{% trans "Supprimer la sélection" %}</a>
             <!-- Confirmation modal -->
-            <form id="form-delete-images" name="form" method="post" action="{% url "gallery-image-delete" gallery.pk %}" class="modal modal-flex">
+            <form id="form-delete-images" name="form" method="post" action="{% url "gallery-item-delete" gallery.pk %}" class="modal modal-flex">
                 <input type="hidden" name="gallery" value="{{ gallery.pk }}">
                 {% csrf_token %}
                 <p>{% trans "Attention, vous vous appretez à supprimer toutes les images sélectionnées." %}</p>
@@ -135,6 +135,30 @@
         </button>
 
         <div class="gallery topic-list list-view clearfix navigable-list">
+            {% for grp in groups %}
+             <div class="topic gallery-item navigable-elem">
+                    <div class="topic-infos">
+                        {% if permissions.write %}
+                            <input
+                                name="g_items"
+                                type="checkbox"
+                                value="{{ grp.pk }}"
+                                form="form-delete-images">
+                        {% endif %}
+                    </div>
+                    <div class="topic-description">
+                        <a href="{% url "gallery-group-edit" gallery.pk grp.pk %}" class="topic-title-link navigable-link">
+                            <img src=""
+                                 data-caption="{{ grp.title }}"
+                                 alt="{{ grp.title }}"
+                                 class="topic-image"
+                            >
+                            <span class="topic-title">{{ grp.title }}</span>
+                            <span class="topic-subtitle">{{ grp.legend|default:"" }}</span>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
             {% for img in images %}
                 <div class="topic gallery-item navigable-elem">
                     <div class="topic-infos">

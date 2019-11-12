@@ -1,7 +1,8 @@
 from django.urls import re_path
 
 from zds.gallery.views import NewGallery, NewImage, DeleteImages, EditImage, ImportImages, GalleryDetails, \
-    EditGallery, ListGallery, DeleteGalleries, EditGalleryMembers
+    EditGallery, ListGallery, DeleteGalleries, EditGalleryMembers, NewGalleryGroup, EditGalleryGroup, \
+    GalleryGroupDetails
 
 
 urlpatterns = [
@@ -19,11 +20,23 @@ urlpatterns = [
     re_path(r'^supprimer/$', DeleteGalleries.as_view(),
             name='galleries-delete'),
 
+    # Gallery items operations
+
+    re_path(r'^item/supprimer/(?P<pk_gallery>\d+)/$',
+            DeleteImages.as_view(), name='gallery-item-delete'),
+
+    # Group operations
+    re_path(r'^groupe/voir/(?P<pk>\d+)/(?P<slug>.+)/(?P<pk_group>\d+)/(?P<slug_group>.+)/$',
+            GalleryGroupDetails.as_view(), name='gallery-group-details'),
+    re_path(r'^groupe/ajouter/(?P<pk_gallery>\d+)/$',
+            NewGalleryGroup.as_view(), name='gallery-group-new'),
+    re_path(r'^groupe/editer/(?P<pk_gallery>\d+)/(?P<pk>\d+)/$',
+            EditGalleryGroup.as_view(), name='gallery-group-edit'),
+
+
     # Image operations
     re_path(r'^image/ajouter/(?P<pk_gallery>\d+)/$',
             NewImage.as_view(), name='gallery-image-new'),
-    re_path(r'^image/supprimer/(?P<pk_gallery>\d+)/$',
-            DeleteImages.as_view(), name='gallery-image-delete'),
     re_path(r'^image/editer/(?P<pk_gallery>\d+)/(?P<pk>\d+)/$',
             EditImage.as_view(), name='gallery-image-edit'),
     re_path(r'^image/importer/(?P<pk_gallery>\d+)/$',

@@ -9,7 +9,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.urls import reverse
 
-from zds.gallery.models import Gallery, Image, UserGallery
+from zds.gallery.models import Gallery, Image, GalleryGroup, UserGallery
 
 
 class GalleryForm(forms.ModelForm):
@@ -116,6 +116,51 @@ class UserGalleryForm(forms.Form):
                 [_("Ce nom d'utilisateur n'existe pas")])
 
         return cleaned_data
+
+
+class GalleryGroupForm(forms.ModelForm):
+
+    class Meta:
+        model = GalleryGroup
+
+        fields = ['title']
+
+    def __init__(self, *args, **kwargs):
+        super(GalleryGroupForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_class = 'clearfix'
+        self.helper.form_method = 'post'
+
+        self.helper.layout = Layout(
+            Field('title'),
+            Field('parent'),
+            ButtonHolder(
+                StrictButton(_('Ajouter'), type='submit'),
+            ),
+        )
+
+    def clean(self):
+        cleaned_data = super(GalleryGroupForm, self).clean()
+
+        return cleaned_data
+
+
+class UpdateGalleryGroupForm(GalleryGroupForm):
+
+    def __init__(self, *args, **kwargs):
+        super(UpdateGalleryGroupForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.helper.form_class = 'clearfix'
+        self.helper.form_method = 'post'
+
+        self.helper.layout = Layout(
+            Field('title'),
+            Field('parent'),
+            ButtonHolder(
+                StrictButton(_('Mettre à jour'), type='submit'),
+            ),
+        )
 
 
 class ImageForm(forms.ModelForm):

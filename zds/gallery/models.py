@@ -96,6 +96,30 @@ models.signals.post_save.connect(receiver=change_api_updated_user_gallery_at, se
 models.signals.post_delete.connect(receiver=change_api_updated_user_gallery_at, sender=UserGallery)
 
 
+class GalleryGroup(models.Model):
+    """Represent a gallery group in database"""
+
+    class Meta:
+        verbose_name = _('Groupe')
+        verbose_name_plural = _('Groupes')
+
+    gallery = models.ForeignKey('Gallery', verbose_name=_('Galerie'), db_index=True, on_delete=models.CASCADE)
+    parent = models.ForeignKey('GalleryGroup', verbose_name=_('Parent'), db_index=True, null=True, on_delete=models.CASCADE)
+    title = models.CharField(_('Titre'), max_length=80)
+    slug = models.SlugField(max_length=80)
+
+    def __init__(self, *args, **kwargs):
+        super(GalleryGroup, self).__init__(*args, **kwargs)
+
+    def __str__(self):
+        """Human-readable representation of the Group model.
+
+        :return: Image slug
+        :rtype: unicode
+        """
+        return self.slug
+
+
 class Image(models.Model):
     """Represent an image in database"""
 
@@ -104,6 +128,7 @@ class Image(models.Model):
         verbose_name_plural = _('Images')
 
     gallery = models.ForeignKey('Gallery', verbose_name=_('Galerie'), db_index=True, on_delete=models.CASCADE)
+    group = models.ForeignKey('GalleryGroup', verbose_name=_('Groupe'), db_index=True, null=True, on_delete=models.CASCADE)
     title = models.CharField(_('Titre'), max_length=80)
     slug = models.SlugField(max_length=80)
     physical = ThumbnailerImageField(upload_to=image_path, max_length=200)
@@ -257,6 +282,14 @@ class Gallery(models.Model):
         :rtype: QuerySet
         """
         return Image.objects.filter(gallery=self).order_by('pubdate').all()
+
+    def get_groups(self):
+        """Get all images in the gallery, ordered by name.
+
+        :return: all groups in the gallery
+        :rtype: QuerySet
+        """
+        return GalleryGroup.objects.filter(gallery=self).order_by('title').all()
 
     def get_last_image(self):
         """Get the last image added in the gallery.
