@@ -312,14 +312,17 @@ class GalleryGroupDetails(GalleryDetails, GalleryGroupMixin):
 
     def get(self, request, *args, **kwargs):
 
-        retval = super().get(request, *args, **kwargs)
+        try:
+            self.get_gallery(kwargs.get('pk'), kwargs.get('slug'))
+        except Gallery.DoesNotExist:
+            raise Http404()
 
         try:
             self.get_group(kwargs.get('pk_group'), kwargs.get('slug_group'))
         except GalleryGroup.DoesNotExist:
             raise Http404()
 
-        return retval
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
         return self.gallery.get_images().filter(group=self.group).order_by('title')
