@@ -311,12 +311,15 @@ class GalleryGroupDetails(GalleryDetails, GalleryGroupMixin):
     """Gallery group details"""
 
     def get(self, request, *args, **kwargs):
+
+        retval = super().get(request, *args, **kwargs)
+
         try:
             self.get_group(kwargs.get('pk_group'), kwargs.get('slug_group'))
         except GalleryGroup.DoesNotExist:
             raise Http404()
 
-        return super().get(request, *args, **kwargs)
+        return retval
 
     def get_queryset(self):
         return self.gallery.get_images().filter(group=self.group).order_by('title')
@@ -325,7 +328,7 @@ class GalleryGroupDetails(GalleryDetails, GalleryGroupMixin):
         return self.gallery.get_groups().filter(parent=self.group)
 
     def get_context_data(self, **kwargs):
-        context = super(GalleryDetails, self).get_context_data(**kwargs)
+        context = super(GalleryGroupDetails, self).get_context_data(**kwargs)
 
         context['groups'] = self.get_groups()
 

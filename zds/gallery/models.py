@@ -284,7 +284,7 @@ class Gallery(models.Model):
         return Image.objects.filter(gallery=self).order_by('pubdate').all()
 
     def get_groups(self):
-        """Get all images in the gallery, ordered by name.
+        """Get all groups in the gallery, ordered by name.
 
         :return: all groups in the gallery
         :rtype: QuerySet

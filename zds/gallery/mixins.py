@@ -227,12 +227,12 @@ class GalleryGroupMixin(GalleryMixin):
 
         :rtype: zds.gallery.models.GalleryGroup
         """
-        queryset = GalleryGroup.objects.filter(pk=pk, gallery=self.gallery).get()
+        queryset = GalleryGroup.objects.filter(pk=pk, gallery=self.gallery)
 
         if slug is not None:
             queryset = queryset.filter(slug=slug)
 
-        self.group = queryset
+        self.group = queryset.get()
         return self.group
 
 
